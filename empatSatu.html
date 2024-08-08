@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Empat Satu</title>
@@ -11,301 +11,399 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-  </head>
-  <body>
+</head>
+<body>
     <div class="container">
-      <h1>Rekap Hasil Permainan Empat Satu</h1>
+        <h1>Rekap Hasil Permainan Empat Satu</h1>
 
-      <div id="step1" class="mb-3">
-        <label for="numPlayers" class="form-label">Jumlah Pemain:</label>
-        <div class="input-group">
-          <button id="decrementPlayers" class="btn btn-outline-secondary" type="button"><i class="fas fa-minus"></i></button>
-          <input type="number" id="numPlayers" class="form-control text-center" value="2" readonly>
-          <button id="incrementPlayers" class="btn btn-outline-secondary" type="button"><i class="fas fa-plus"></i></button>
+        <div id="step1" class="mb-3">
+            <label for="numPlayers" class="form-label">Jumlah Pemain:</label>
+            <div class="input-group">
+                <button id="decrementPlayers" class="btn btn-outline-secondary" type="button"><i class="fas fa-minus"></i></button>
+                <input type="number" id="numPlayers" class="form-control text-center" value="2" readonly>
+                <button id="incrementPlayers" class="btn btn-outline-secondary" type="button"><i class="fas fa-plus"></i></button>
+            </div>
+            <button id="nextStep1" class="btn btn-primary mt-2"><i class="fas fa-arrow-right"></i> Selanjutnya</button>
         </div>
-        <button id="nextStep1" class="btn btn-primary mt-2"><i class="fas fa-arrow-right"></i> Selanjutnya</button>
-      </div>
 
-      <div id="step2" class="mb-3" style="display: none;">
-        <label for="playerNames" class="form-label">Nama Pemain:</label>
-        <div id="playerNames"></div>
-        <button id="nextStep2" class="btn btn-primary mt-2"><i class="fas fa-arrow-right"></i> Selanjutnya</button>
-      </div>
+        <div id="step2" class="mb-3" style="display: none;">
+            <label for="playerNames" class="form-label">Nama Pemain:</label>
+            <div id="playerNames"></div>
+            <button id="nextStep2" class="btn btn-primary mt-2"><i class="fas fa-arrow-right"></i> Selanjutnya</button>
+        </div>
 
-      <div id="step3" class="table-responsive" style="display: none;">
-        <table class="table table-bordered text-nowrap" id="resultsTable">
-          <thead>
-            <tr id="tableHeader">
-              <th>Permainan Ke-</th>
-              <!-- Kolom tambahan akan ditambahkan secara dinamis -->
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
-        
-        <button id="addRow" class="btn btn-secondary"><i class="fas fa-plus"></i> Tambah Permainan</button>
-        <button id="finishGame" class="btn btn-success"><i class="fas fa-check"></i> Selesai Permainan</button>
-        <button id="exportExcel" class="btn btn-success" style="display: none;"><i class="fas fa-file-excel"></i> Export ke Excel</button>
-        <button id="exportPdf" class="btn btn-danger" style="display: none;"><i class="fas fa-file-pdf"></i> Export ke PDF</button>
-      </div>
+        <div id="step3" class="table-responsive" style="display: none;">
+            <table class="table table-bordered text-nowrap" id="resultsTable">
+                <thead>
+                    <tr id="tableHeader">
+                        <th>Permainan Ke-</th>
+                        <!-- Kolom tambahan akan ditambahkan secara dinamis -->
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+                <tfoot>
+                    <tr id="totalRow">
+                        <th>Jumlah</th>
+                        <!-- Kolom tambahan untuk total akan ditambahkan secara dinamis -->
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <button id="addRow" class="btn btn-secondary"><i class="fas fa-plus"></i> Tambah Permainan</button>
+            <button id="finishGame" class="btn btn-success"><i class="fas fa-check"></i> Selesai Permainan</button>
+            <button id="exportExcel" class="btn btn-success" style="display: none;"><i class="fas fa-file-excel"></i> Export ke Excel</button>
+            <button id="exportPdf" class="btn btn-danger" style="display: none;"><i class="fas fa-file-pdf"></i> Export ke PDF</button>
+        </div>
     </div>
 
     <script>
-      document.getElementById('incrementPlayers').addEventListener('click', function() {
-        const numPlayers = document.getElementById('numPlayers');
-        if (parseInt(numPlayers.value) < 10) {
-          numPlayers.value = parseInt(numPlayers.value) + 1;
-        }
-      });
+        function updateTotal() {
+            const numPlayers = document.getElementById('numPlayers').value;
+            const tbody = document.querySelector('#resultsTable tbody');
+            const totalRow = document.getElementById('totalRow');
+            let totals = Array(parseInt(numPlayers)).fill(0);
 
-      document.getElementById('decrementPlayers').addEventListener('click', function() {
-        const numPlayers = document.getElementById('numPlayers');
-        if (parseInt(numPlayers.value) > 2) {
-          numPlayers.value = parseInt(numPlayers.value) - 1;
-        }
-      });
-
-      document.getElementById('nextStep1').addEventListener('click', function() {
-        const numPlayers = document.getElementById('numPlayers').value;
-        
-        const playerNamesDiv = document.getElementById('playerNames');
-        playerNamesDiv.innerHTML = '';
-
-        for (let i = 1; i <= numPlayers; i++) {
-          const div = document.createElement('div');
-          div.className = 'mb-2';
-          const label = document.createElement('label');
-          label.textContent = 'Nama Pemain ' + i + ':';
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.className = 'form-control';
-          input.id = 'player' + i;
-          div.appendChild(label);
-          div.appendChild(input);
-          playerNamesDiv.appendChild(div);
-        }
-
-        document.getElementById('step1').style.display = 'none';
-        document.getElementById('step2').style.display = 'block';
-      });
-
-      document.getElementById('nextStep2').addEventListener('click', function() {
-        const numPlayers = document.getElementById('numPlayers').value;
-        const tableHeader = document.getElementById('tableHeader');
-        tableHeader.innerHTML = '<th>Permainan Ke-</th>';
-        let allFilled = true;
-        let errorMessage = "";
-
-        for (let i = 1; i <= numPlayers; i++) {
-          const playerName = document.getElementById('player' + i).value;
-          if (!playerName.trim()) {
-            allFilled = false;
-            errorMessage += `Nama pemain ${i} tidak boleh kosong. `;
-          } else {
-            const th = document.createElement('th');
-            th.textContent = playerName;
-            tableHeader.appendChild(th);
-          }
-        }
-
-        // Menambahkan header untuk kolom aksi
-        const thAction = document.createElement('th');
-        thAction.textContent = 'Aksi';
-        tableHeader.appendChild(thAction);
-
-        if (!allFilled) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: errorMessage
-          });
-          return;
-        }
-
-        document.getElementById('step2').style.display = 'none';
-        document.getElementById('step3').style.display = 'block';
-      });
-
-      document.getElementById('addRow').addEventListener('click', function() {
-        const numPlayers = document.getElementById('numPlayers').value;
-        const tbody = document.querySelector('#resultsTable tbody');
-        const newRow = document.createElement('tr');
-
-        const tdIndex = document.createElement('td');
-        tdIndex.textContent = tbody.rows.length + 1;
-        newRow.appendChild(tdIndex);
-
-        for (let i = 1; i <= numPlayers; i++) {
-          const td = document.createElement('td');
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.className = 'form-control';
-          input.maxLength = 2;
-          input.oninput = function() {
-            if (this.value !== "" && (parseInt(this.value) > 41 || parseInt(this.value) < 0)) {
-              this.value = this.value.slice(0, -1);
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Nilai harus antara 0 dan 41.'
-              });
+            for (let i = 0; i < tbody.rows.length; i++) {
+                const row = tbody.rows[i];
+                for (let j = 1; j <= numPlayers; j++) {
+                    const value = parseInt(row.cells[j].firstChild.value);
+                    if (!isNaN(value)) {
+                        totals[j - 1] += value;
+                    }
+                }
             }
-          };
-          td.appendChild(input);
-          newRow.appendChild(td);
-        }
 
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn btn-danger btn-sm';
-        deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-        deleteBtn.onclick = function() {
-          newRow.remove();
-        };
-        const tdDelete = document.createElement('td');
-        tdDelete.appendChild(deleteBtn);
-        newRow.appendChild(tdDelete);
-
-        tbody.appendChild(newRow);
-      });
-
-      document.getElementById('finishGame').addEventListener('click', function() {
-        const tbody = document.querySelector('#resultsTable tbody');
-        if (tbody.rows.length === 0) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Tidak ada permainan yang ditambahkan.'
-          });
-          return;
-        }
-
-        let allRowsFilled = true;
-        let errorMessage = "";
-
-        for (let i = 0; i < tbody.rows.length; i++) {
-          const row = tbody.rows[i];
-          for (let j = 1; j < row.cells.length - 1; j++) {
-            if (!row.cells[j].firstChild.value.trim()) {
-              allRowsFilled = false;
-              errorMessage += `Baris ${i + 1}, Kolom ${j} tidak boleh kosong. `;
+            for (let i = 1; i <= numPlayers; i++) {
+                totalRow.cells[i].textContent = totals[i - 1];
             }
-          }
         }
 
-        if (!allRowsFilled) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: errorMessage
-          });
-          return;
-        }
-
-        // Disable addRow, finishGame, and delete buttons
-        document.getElementById('addRow').disabled = true;
-        document.getElementById('finishGame').disabled = true;
-        tbody.querySelectorAll('button.btn-danger').forEach(btn => btn.disabled = true);
-        tbody.querySelectorAll('input').forEach(input => input.disabled = true);
-
-        Swal.fire({
-          icon: 'success',
-          title: 'Permainan Selesai',
-          text: 'Anda dapat mengekspor hasilnya ke Excel atau PDF sekarang.'
-        });
-        document.getElementById('exportExcel').style.display = 'inline-block';
-        document.getElementById('exportPdf').style.display = 'inline-block';
-      });
-
-      document.getElementById('exportExcel').addEventListener('click', function() {
-        const table = document.getElementById('resultsTable');
-        const rows = table.querySelectorAll('tr');
-        let data = [];
-
-        // Add title
-        data.push(["Rekap Hasil Permainan Empat Satu"]);
-        data.push([]); // Empty row
-
-        // Extract header
-        let header = [];
-        rows[0].querySelectorAll('th').forEach((th, index) => {
-          if (index < rows[0].querySelectorAll('th').length - 1) { // Exclude the last column (Aksi)
-            header.push(th.innerText);
-          }
-        });
-        data.push(header);
-
-        // Extract rows
-        for (let i = 1; i < rows.length; i++) {
-          let row = [];
-          rows[i].querySelectorAll('td').forEach((td, index) => {
-            if (index === 0) { // Include the first column (Nomor Permainan)
-              row.push(td.innerText);
-            } else if (index < rows[i].querySelectorAll('td').length - 1) { // Exclude the last column (Aksi)
-              row.push(td.firstChild ? td.firstChild.value : td.innerText);
+        document.getElementById('incrementPlayers').addEventListener('click', function() {
+            const numPlayers = document.getElementById('numPlayers');
+            if (parseInt(numPlayers.value) < 10) {
+                numPlayers.value = parseInt(numPlayers.value) + 1;
             }
-          });
-          data.push(row);
-        }
-
-        // Convert data array to worksheet
-        const worksheet = XLSX.utils.aoa_to_sheet(data);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet 1");
-
-        // Style the title
-        worksheet['A1'].s = { font: { bold: true } };
-
-        // Export the workbook to Excel file
-        XLSX.writeFile(workbook, 'rekap_permainan_41.xlsx');
-      });
-
-      document.getElementById('exportPdf').addEventListener('click', function() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        const table = document.getElementById('resultsTable');
-        const rows = table.querySelectorAll('tr');
-        let data = [];
-
-        // Extract header
-        let header = [];
-        rows[0].querySelectorAll('th').forEach((th, index) => {
-          if (index < rows[0].querySelectorAll('th').length - 1) { // Exclude the last column (Aksi)
-            header.push(th.innerText);
-          }
-        });
-        data.push(header);
-
-        // Extract rows
-        for (let i = 1; i < rows.length; i++) {
-          let row = [];
-          rows[i].querySelectorAll('td').forEach((td, index) => {
-            if (index === 0) { // Include the first column (Nomor Permainan)
-              row.push(td.innerText);
-            } else if (index < rows[i].querySelectorAll('td').length - 1) { // Exclude the last column (Aksi)
-              row.push(td.firstChild ? td.firstChild.value : td.innerText);
-            }
-          });
-          data.push(row);
-        }
-
-        // Add the title to the PDF
-        doc.text('Rekap Hasil Permainan Empat Satu', 14, 10);
-
-        // Add the data to the PDF
-        doc.autoTable({
-          head: [data[0]],
-          body: data.slice(1),
-          startY: 20
         });
 
-        // Save the PDF
-        doc.save('rekap_permainan_41.pdf');
-      });
-    </script>
+        document.getElementById('decrementPlayers').addEventListener('click', function() {
+            const numPlayers = document.getElementById('numPlayers');
+            if (parseInt(numPlayers.value) > 2) {
+                numPlayers.value = parseInt(numPlayers.value) - 1;
+            }
+        });
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-  </body>
+        document.getElementById('nextStep1').addEventListener('click', function() {
+            const numPlayers = document.getElementById('numPlayers').value;
+            
+            const playerNamesDiv = document.getElementById('playerNames');
+            playerNamesDiv.innerHTML = '';
+
+            for (let i = 1; i <= numPlayers; i++) {
+                const div = document.createElement('div');
+                div.className = 'mb-2';
+                const label = document.createElement('label');
+                label.textContent = 'Nama Pemain ' + i + ':';
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'form-control';
+                input.id = 'player' + i;
+                div.appendChild(label);
+                div.appendChild(input);
+                playerNamesDiv.appendChild(div);
+            }
+
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        });
+
+        document.getElementById('nextStep2').addEventListener('click', function() {
+            const numPlayers = document.getElementById('numPlayers').value;
+            const tableHeader = document.getElementById('tableHeader');
+            tableHeader.innerHTML = '<th>Permainan Ke-</th>';
+            let allFilled = true;
+            let errorMessage = "";
+
+            for (let i = 1; i <= numPlayers; i++) {
+                const playerName = document.getElementById('player' + i).value;
+                if (!playerName.trim()) {
+                    allFilled = false;
+                    errorMessage += `Nama pemain ${i} tidak boleh kosong. `;
+                } else {
+                    const th = document.createElement('th');
+                    th.textContent = playerName;
+                    tableHeader.appendChild(th);
+                }
+            }
+
+            // Menambahkan header untuk kolom aksi
+            const thAction = document.createElement('th');
+            thAction.textContent = 'Aksi';
+            tableHeader.appendChild(thAction);
+
+            // Menambahkan kolom untuk total di baris total
+            const totalRow = document.getElementById('totalRow');
+            totalRow.innerHTML = '<th>Jumlah</th>';
+            for (let i = 0; i < numPlayers; i++) {
+                const td = document.createElement('td');
+                totalRow.appendChild(td);
+            }
+            const tdAction = document.createElement('td');
+            totalRow.appendChild(tdAction);
+
+            if (!allFilled) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMessage
+                });
+                return;
+            }
+
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'block';
+        });
+
+        document.getElementById('addRow').addEventListener('click', function() {
+            const numPlayers = document.getElementById('numPlayers').value;
+            const tbody = document.querySelector('#resultsTable tbody');
+            const newRow = document.createElement('tr');
+
+            const tdIndex = document.createElement('td');
+            tdIndex.textContent = tbody.rows.length + 1;
+            newRow.appendChild(tdIndex);
+
+            for (let i = 1; i <= numPlayers; i++) {
+                const td = document.createElement('td');
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'form-control';
+                input.maxLength = 2;
+                input.oninput = function() {
+                    if (this.value !== "" && (parseInt(this.value) > 41 || parseInt(this.value) < 0)) {
+                        this.value = this.value.slice(0, -1);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Nilai harus antara 0 dan 41.'
+                        });
+                    } else {
+                        updateTotal();
+                    }
+                };
+                td.appendChild(input);
+                newRow.appendChild(td);
+            }
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-danger btn-sm';
+            deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+            deleteBtn.onclick = function() {
+                newRow.remove();
+                updateTotal();
+            };
+            const tdDelete = document.createElement('td');
+            tdDelete.appendChild(deleteBtn);
+            newRow.appendChild(tdDelete);
+
+            tbody.appendChild(newRow);
+            updateTotal();
+        });
+
+        function updateTotal() {
+            const numPlayers = document.getElementById('numPlayers').value;
+            const tbody = document.querySelector('#resultsTable tbody');
+            const totalRow = document.getElementById('totalRow');
+            let totals = Array(parseInt(numPlayers)).fill(0);
+
+            for (let i = 0; i < tbody.rows.length; i++) {
+                const row = tbody.rows[i];
+                for (let j = 1; j <= numPlayers; j++) {
+                    const value = parseInt(row.cells[j].firstChild.value);
+                    if (!isNaN(value)) {
+                        totals[j - 1] += value;
+                    }
+                }
+            }
+
+            for (let i = 1; i <= numPlayers; i++) {
+                totalRow.cells[i].textContent = totals[i - 1];
+            }
+        }
+
+        document.getElementById('finishGame').addEventListener('click', function() {
+            const tbody = document.querySelector('#resultsTable tbody');
+            if (tbody.rows.length === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Tidak ada permainan yang ditambahkan.'
+                });
+                return;
+            }
+
+            let allRowsFilled = true;
+            let errorMessage = "";
+
+            for (let i = 0; i < tbody.rows.length; i++) {
+                const row = tbody.rows[i];
+                for (let j = 1; j < row.cells.length - 1; j++) {
+                    if (!row.cells[j].firstChild.value.trim()) {
+                        allRowsFilled = false;
+                        errorMessage += `Baris ${i + 1}, Kolom ${j} tidak boleh kosong. `;
+                    }
+                }
+            }
+
+            if (!allRowsFilled) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMessage
+                });
+                return;
+            }
+
+            // Disable addRow, finishGame, and delete buttons
+            document.getElementById('addRow').disabled = true;
+            document.getElementById('finishGame').disabled = true;
+            tbody.querySelectorAll('button.btn-danger').forEach(btn => btn.disabled = true);
+            tbody.querySelectorAll('input').forEach(input => input.disabled = true);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Permainan Selesai',
+                text: 'Anda dapat mengekspor hasilnya ke Excel atau PDF sekarang.'
+            });
+            document.getElementById('exportExcel').style.display = 'inline-block';
+            document.getElementById('exportPdf').style.display = 'inline-block';
+        });
+
+        document.getElementById('exportExcel').addEventListener('click', function() {
+            const table = document.getElementById('resultsTable');
+            const rows = table.querySelectorAll('tr');
+            let data = [];
+
+            // Add title
+            data.push(["Rekap Hasil Permainan Empat Satu"]);
+            data.push([`Tanggal Cetak: ${new Date().toLocaleString()}`]); // Add print date
+            data.push([]); // Empty row
+
+            // Extract header
+            let header = [];
+            rows[0].querySelectorAll('th').forEach((th, index) => {
+                if (index < rows[0].querySelectorAll('th').length - 1) { // Exclude the last column (Aksi)
+                    header.push(th.innerText);
+                }
+            });
+            data.push(header);
+
+            // Extract rows
+            for (let i = 1; i < rows.length - 1; i++) { // Loop through all rows except the last row (total row)
+                let row = [];
+                rows[i].querySelectorAll('td').forEach((td, index) => {
+                    if (index === 0) { // Include the first column (Nomor Permainan)
+                        row.push(td.innerText);
+                    } else if (index < rows[i].querySelectorAll('td').length - 1) { // Exclude the last column (Aksi)
+                        row.push(td.firstChild ? td.firstChild.value : td.innerText);
+                    }
+                });
+                data.push(row);
+            }
+
+            // Add total row
+            let totalRowData = ['Jumlah'];
+            for (let i = 1; i <= header.length - 1; i++) {
+                let total = 0;
+                rows.forEach(row => {
+                    if (row.querySelectorAll('td')[i] && row.querySelectorAll('td')[i].firstChild) {
+                        const value = parseInt(row.querySelectorAll('td')[i].firstChild.value);
+                        if (!isNaN(value)) {
+                            total += value;
+                        }
+                    }
+                });
+                totalRowData.push(total);
+            }
+            data.push(totalRowData);
+
+            // Convert data array to worksheet
+            const worksheet = XLSX.utils.aoa_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet 1");
+
+            // Style the title
+            worksheet['A1'].s = { font: { bold: true } };
+
+            // Export the workbook to Excel file
+            XLSX.writeFile(workbook, 'rekap_permainan_41.xlsx');
+        });
+
+        document.getElementById('exportPdf').addEventListener('click', function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const table = document.getElementById('resultsTable');
+            const rows = table.querySelectorAll('tr');
+            let data = [];
+
+            // Extract header
+            let header = [];
+            rows[0].querySelectorAll('th').forEach((th, index) => {
+                if (index < rows[0].querySelectorAll('th').length - 1) { // Exclude the last column (Aksi)
+                    header.push(th.innerText);
+                }
+            });
+            data.push(header);
+
+            // Extract rows
+            for (let i = 1; i < rows.length - 1; i++) { // Loop through all rows except the last row (total row)
+                let row = [];
+                rows[i].querySelectorAll('td').forEach((td, index) => {
+                    if (index === 0) { // Include the first column (Nomor Permainan)
+                        row.push(td.innerText);
+                    } else if (index < rows[i].querySelectorAll('td').length - 1) { // Exclude the last column (Aksi)
+                        row.push(td.firstChild ? td.firstChild.value : td.innerText);
+                    }
+                });
+                data.push(row);
+            }
+
+            // Add total row
+            let totalRowData = ['Jumlah'];
+            for (let i = 1; i <= header.length - 1; i++) {
+                let total = 0;
+                rows.forEach(row => {
+                    if (row.querySelectorAll('td')[i] && row.querySelectorAll('td')[i].firstChild) {
+                        const value = parseInt(row.querySelectorAll('td')[i].firstChild.value);
+                        if (!isNaN(value)) {
+                            total += value;
+                        }
+                    }
+                });
+                totalRowData.push(total);
+            }
+            data.push(totalRowData);
+
+            // Add the title and print date to the PDF
+            doc.text('Rekap Hasil Permainan Empat Satu', 14, 10);
+            doc.text(`Tanggal Cetak: ${new Date().toLocaleString()}`, 14, 18);
+
+            // Add the data to the PDF
+            doc.autoTable({
+                head: [data[0]],
+                body: data.slice(1),
+                startY: 22
+            });
+
+            // Save the PDF
+            doc.save('rekap_permainan_41.pdf');
+        });
+        </script>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+</body>
 </html>
