@@ -178,10 +178,14 @@
 
             for (let i = 1; i <= numPlayers; i++) {
                 const td = document.createElement('td');
+                td.style.display = 'flex';
+                td.style.alignItems = 'center';
+            
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.className = 'form-control';
                 input.maxLength = 2;
+                input.style.width = 'fit-content'; // Lebar mengikuti konten
                 input.oninput = function() {
                     if (this.value !== "" && (parseInt(this.value) > 41 || parseInt(this.value) < 0)) {
                         this.value = this.value.slice(0, -1);
@@ -194,6 +198,7 @@
                         updateTotal();
                     }
                 };
+            
                 td.appendChild(input);
                 newRow.appendChild(td);
             }
