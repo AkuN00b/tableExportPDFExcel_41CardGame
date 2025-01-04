@@ -14,6 +14,20 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Tambahkan jQuery dan Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        .form-control {
+            width: 100%; /* Lebar input 100% */
+            min-width: 60px; /* Lebar minimum input */
+        }
+        td {
+            min-width: 60px; /* Lebar minimum td */
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -39,7 +53,7 @@
             <table class="table table-bordered text-nowrap" id="resultsTable">
                 <thead>
                     <tr id="tableHeader">
-                        <th>Permainan Ke-</th>
+                        <th width="1px">Permainan Ke-</th>
                         <!-- Kolom tambahan akan ditambahkan secara dinamis -->
                         <th>Aksi</th>
                     </tr>
@@ -57,9 +71,31 @@
             </table>
             
             <button id="addRow" class="btn btn-secondary"><i class="fas fa-plus"></i> Tambah Permainan</button>
+            <button id="editAllPlayers" class="btn btn-warning"><i class="fas fa-edit"></i> Ubah Nama Semua Pemain</button>
             <button id="finishGame" class="btn btn-success"><i class="fas fa-check"></i> Selesai Permainan</button>
             <button id="exportExcel" class="btn btn-success" style="display: none;"><i class="fas fa-file-excel"></i> Export ke Excel</button>
             <button id="exportPdf" class="btn btn-danger" style="display: none;"><i class="fas fa-file-pdf"></i> Export ke PDF</button>
+        </div>
+    </div>
+
+    <!-- Modal untuk Mengubah Nama Semua Pemain -->
+    <div class="modal fade" id="editAllPlayersModal" tabindex="-1" role="dialog" aria-labelledby="editAllPlayersModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editAllPlayersModalLabel">Ubah Nama Semua Pemain</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="playerInputsContainer">
+                    <!-- Input untuk nama pemain akan ditambahkan di sini -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="saveAllChanges">Simpan Perubahan</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -126,7 +162,7 @@
         document.getElementById('nextStep2').addEventListener('click', function() {
             const numPlayers = document.getElementById('numPlayers').value;
             const tableHeader = document.getElementById('tableHeader');
-            tableHeader.innerHTML = '<th>Permainan Ke-</th>';
+            tableHeader.innerHTML = '<th width="1px">Permainan Ke-</th>';
             let allFilled = true;
             let errorMessage = "";
 
@@ -138,6 +174,7 @@
                 } else {
                     const th = document.createElement('th');
                     th.textContent = playerName;
+                    th.setAttribute('id', 'playerTableName' + i); // Menetapkan ID untuk th
                     tableHeader.appendChild(th);
                 }
             }
@@ -145,6 +182,7 @@
             // Menambahkan header untuk kolom aksi
             const thAction = document.createElement('th');
             thAction.textContent = 'Aksi';
+            thAction.style.width = '1px'; // Mengatur lebar kolom menjadi 1px
             tableHeader.appendChild(thAction);
 
             // Menambahkan kolom untuk total di baris total
@@ -179,19 +217,21 @@
             tdIndex.textContent = tbody.rows.length + 1;
             newRow.appendChild(tdIndex);
 
-            for (let i = 1; i <= numPlayers; i++) {
-                const td = document.createElement('td');
+            for (var i = 1; i <= numPlayers; i++) {
+                var td = document.createElement('td');
 
-                const input = document.createElement('input');
-                input.type = 'text';
+                var input = document.createElement('input');
+                input.type = 'number'; // Mengatur tipe input menjadi number
                 input.className = 'form-control';
-                input.maxLength = 2;
-                input.style.width = 'auto'; // Set lebar awal ke auto
-                input.style.minWidth = '25px'; // Set lebar minimum agar tidak terlalu kecil
+                input.maxLength = 2; // Ini tidak berfungsi untuk input type="number", tetapi bisa ditinggalkan
+                input.min = 0; // Nilai minimum
+                input.max = 41; // Nilai maksimum
 
                 input.oninput = function() {
+                    // Validasi untuk memastikan nilai berada dalam rentang yang ditentukan
                     if (this.value !== "" && (parseInt(this.value) > 41 || parseInt(this.value) < 0)) {
-                        this.value = this.value.slice(0, -1);
+                        this.value = ''; // Kosongkan input jika nilai tidak valid
+                        updateTotal();
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
@@ -202,6 +242,7 @@
                     }
                 };
 
+                // Tambahkan input ke td dan td ke newRow
                 td.appendChild(input);
                 newRow.appendChild(td);
             }
@@ -213,12 +254,45 @@
                 newRow.remove();
                 updateTotal();
             };
+
             const tdDelete = document.createElement('td');
             tdDelete.appendChild(deleteBtn);
             newRow.appendChild(tdDelete);
 
             tbody.appendChild(newRow);
             updateTotal();
+        });
+
+        // Event listener untuk tombol "Ubah Nama Semua Pemain"
+        document.getElementById('editAllPlayers').addEventListener('click', function() {
+            const numPlayers = document.getElementById('numPlayers').value;
+            const playerInputsContainer = document.getElementById('playerInputsContainer');
+            playerInputsContainer.innerHTML = ''; // Kosongkan kontainer input
+
+            for (let i = 1; i <= numPlayers; i++) {
+                const playerName = $(`#playerTableName${i}`).text();
+                playerInputsContainer.innerHTML += `
+                    <div class="form-group mb-2">
+                        <label for="playerName${i}">Nama Pemain ${i}: </label>
+                        <input type="text" class="form-control" id="playerName${i}" value="${playerName}" required>
+                    </div>
+                `;
+            }
+
+            // Tampilkan modal
+            $('#editAllPlayersModal').modal('show');
+        });
+
+        // Event listener untuk tombol "Simpan Perubahan"
+        $('#saveAllChanges').on('click', function() {
+            const numPlayers = document.getElementById('numPlayers').value;
+            for (let i = 1; i <= numPlayers; i++) {
+                const newPlayerName = $(`#playerName${i}`).val();
+                $(`#playerTableName${i}`).text(newPlayerName); // Update nama pemain di tabel
+            }
+            
+            // Tutup modal
+            $('#editAllPlayersModal').modal('hide');
         });
 
         function updateTotal() {
