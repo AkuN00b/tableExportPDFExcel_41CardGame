@@ -10,14 +10,6 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-
-    <!-- Tambahkan jQuery dan Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
     <style>
         .form-control {
@@ -26,6 +18,9 @@
         }
         td {
             min-width: 60px; /* Lebar minimum td */
+        }
+        .input-error {
+            border: 2px solid red; /* Outline merah */
         }
     </style>
 </head>
@@ -84,43 +79,31 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editAllPlayersModalLabel">Ubah Nama Semua Pemain</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                    <button type="button" class="close" aria-label="Close" style="border: none; background: transparent; color: #dc3545; font-size: 1.2rem;" onclick="closeModal()">
+                        <i class="fas fa-times"></i>
                     </button>
                 </div>
                 <div class="modal-body" id="playerInputsContainer">
                     <!-- Input untuk nama pemain akan ditambahkan di sini -->
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
                     <button type="button" class="btn btn-primary" id="saveAllChanges">Simpan Perubahan</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Tambahkan jQuery dan Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        function updateTotal() {
-            const numPlayers = document.getElementById('numPlayers').value;
-            const tbody = document.querySelector('#resultsTable tbody');
-            const totalRow = document.getElementById('totalRow');
-            let totals = Array(parseInt(numPlayers)).fill(0);
-
-            for (let i = 0; i < tbody.rows.length; i++) {
-                const row = tbody.rows[i];
-                for (let j = 1; j <= numPlayers; j++) {
-                    const value = parseInt(row.cells[j].firstChild.value);
-                    if (!isNaN(value)) {
-                        totals[j - 1] += value;
-                    }
-                }
-            }
-
-            for (let i = 1; i <= numPlayers; i++) {
-                totalRow.cells[i].textContent = totals[i - 1];
-            }
-        }
-
         document.getElementById('incrementPlayers').addEventListener('click', function() {
             const numPlayers = document.getElementById('numPlayers');
             if (parseInt(numPlayers.value) < 10) {
@@ -227,20 +210,25 @@
                 input.min = 0; // Nilai minimum
                 input.max = 41; // Nilai maksimum
 
-                input.oninput = function() {
-                    // Validasi untuk memastikan nilai berada dalam rentang yang ditentukan
-                    if (this.value !== "" && (parseInt(this.value) > 41 || parseInt(this.value) < 0)) {
-                        this.value = ''; // Kosongkan input jika nilai tidak valid
-                        updateTotal();
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Nilai harus antara 0 dan 41.'
-                        });
-                    } else {
-                        updateTotal();
-                    }
-                };
+                input.oninput = function() {  
+                    // Menghapus karakter yang tidak valid  
+                    this.value = this.value.replace(/[^0-9]/g, ''); // Hanya izinkan angka  
+                  
+                    // Validasi untuk memastikan nilai berada dalam rentang yang ditentukan  
+                    if (this.value !== "" && (parseInt(this.value) > 41 || parseInt(this.value) < 0)) {  
+                        this.value = ''; // Kosongkan input jika nilai tidak valid  
+                        this.classList.add('input-error'); // Tambahkan kelas untuk outline merah
+                        updateTotal();  
+                        Swal.fire({  
+                            icon: 'error',  
+                            title: 'Error',  
+                            text: 'Nilai harus antara 0 dan 41.'  
+                        });  
+                    } else {  
+                        this.classList.remove('input-error'); // Hapus kelas jika nilai valid
+                        updateTotal();  
+                    }  
+                };  
 
                 // Tambahkan input ke td dan td ke newRow
                 td.appendChild(input);
@@ -253,6 +241,7 @@
             deleteBtn.onclick = function() {
                 newRow.remove();
                 updateTotal();
+                updateRowNumbers(); // Memperbarui nomor permainan setelah penghapusan
             };
 
             const tdDelete = document.createElement('td');
@@ -286,13 +275,30 @@
         // Event listener untuk tombol "Simpan Perubahan"
         $('#saveAllChanges').on('click', function() {
             const numPlayers = document.getElementById('numPlayers').value;
+            let changesMade = false; // Variabel untuk melacak apakah ada perubahan
+
             for (let i = 1; i <= numPlayers; i++) {
                 const newPlayerName = $(`#playerName${i}`).val();
-                $(`#playerTableName${i}`).text(newPlayerName); // Update nama pemain di tabel
+                const currentPlayerName = $(`#playerTableName${i}`).text(); // Ambil nama pemain saat ini
+
+                // Bandingkan nama baru dengan nama saat ini
+                if (newPlayerName !== currentPlayerName) {
+                    $(`#playerTableName${i}`).text(newPlayerName); // Update nama pemain di tabel
+                    changesMade = true; // Tandai bahwa ada perubahan
+                }
             }
-            
-            // Tutup modal
-            $('#editAllPlayersModal').modal('hide');
+
+            // Jika tidak ada perubahan, tampilkan pesan
+            if (!changesMade) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Tidak Ada Perubahan',
+                    text: 'Tidak ada nama pemain yang diubah.'
+                });
+            } else {
+                // Tutup modal jika ada perubahan
+                $('#editAllPlayersModal').modal('hide');
+            }
         });
 
         function updateTotal() {
@@ -316,6 +322,22 @@
             }
         }
 
+        // Fungsi untuk memperbarui nomor permainan
+        function updateRowNumbers() {
+            const tbody = document.querySelector('#resultsTable tbody');
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach((row, index) => {
+                const tdIndex = row.querySelector('td'); // Ambil kolom pertama (nomor permainan)
+                if (tdIndex) {
+                    tdIndex.textContent = index + 1; // Update nomor permainan
+                }
+            });
+        }
+
+        function closeModal() {
+            $('#editAllPlayersModal').modal('hide'); // Menutup modal
+        }
+
         document.getElementById('finishGame').addEventListener('click', function() {
             const tbody = document.querySelector('#resultsTable tbody');
             if (tbody.rows.length === 0) {
@@ -328,15 +350,25 @@
             }
 
             let allRowsFilled = true;
-            let errorMessage = "";
+            let errorMessage = []; // Menggunakan array untuk menyimpan pesan kesalahan
 
             for (let i = 0; i < tbody.rows.length; i++) {
                 const row = tbody.rows[i];
+                let rowErrors = []; // Array untuk menyimpan kesalahan di baris ini
+
                 for (let j = 1; j < row.cells.length - 1; j++) {
-                    if (!row.cells[j].firstChild.value.trim()) {
+                    const input = row.cells[j].firstChild; // Ambil input
+                    if (!input.value.trim()) {
                         allRowsFilled = false;
-                        errorMessage += `Baris ${i + 1}, Kolom ${j} tidak boleh kosong. `;
+                        rowErrors.push(`Kolom ${j} tidak boleh kosong.`); // Menyimpan kesalahan di baris ini
+                        input.classList.add('input-error'); // Tambahkan kelas untuk outline merah
+                    } else {
+                        input.classList.remove('input-error'); // Hapus kelas jika input terisi
                     }
+                }
+
+                if (rowErrors.length > 0) {
+                    errorMessage.push(`Baris ${i + 1}: ${rowErrors.join(', ')}`); // Menyimpan kesalahan di baris ini
                 }
             }
 
@@ -344,10 +376,12 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: errorMessage
+                    text: 'Perhatikan input yang belum diisi.', // Pesan kesalahan yang disederhanakan
+                    html: 'Input kosong, harus diisi dan telah ditandai dengan kotak merah.' // Menjelaskan tanda pada input
                 });
                 return;
             }
+
 
             // Disable addRow, finishGame, and delete buttons
             document.getElementById('addRow').disabled = true;
@@ -484,8 +518,6 @@
             // Save the PDF
             doc.save('rekap_permainan_41.pdf');
         });
-        </script>
-
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+    </script>
 </body>
 </html>
