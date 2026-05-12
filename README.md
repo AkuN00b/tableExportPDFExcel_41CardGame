@@ -12,6 +12,8 @@ Proyek ini adalah sebuah aplikasi berbasis web untuk merekap hasil permainan kar
 - Mengubah nama pemain.
 - Menjumlahkan skor otomatis.
 - Validasi input skor kosong.
+- Auto-save sesi di browser + opsi lanjutkan sesi terakhir.
+- Menampilkan ringkasan total skor dan pemenang (skor tertinggi).
 - Mengekspor hasil permainan ke format Excel.
 - Mengekspor hasil permainan ke format PDF.
 
@@ -22,6 +24,7 @@ Proyek ini adalah sebuah aplikasi berbasis web untuk merekap hasil permainan kar
 4. Tambahkan dan masukan skor untuk setiap permainan.
 5. Setelah selesai, klik "Selesai Permainan".
 6. Ekspor hasil permainan ke format Excel atau PDF dengan mengklik tombol yang sesuai.
+7. Jika tidak sengaja refresh, pilih "Lanjutkan" ketika muncul prompt untuk melanjutkan sesi terakhir.
 
 ## Teknologi yang Digunakan
 - HTML
@@ -51,6 +54,8 @@ Proyek ini adalah sebuah aplikasi berbasis web untuk merekap hasil permainan kar
 	* (fitur baru) ada notifikasi jika tidak melakukan perubahan nama pemain pada modal bootstrap, trigger -> submit perubahan nama pemain
 - v1.4.3, update batas maksimal jumlah pemain - 29 Januari 2025
 - v1.4.4, update readme.md - 30 Januari 2025
+- v1.5.0, menggunakan agent ai untuk mengetes agent ai dan memperbarui fitur seperti autosave, export pdf dirapihkan dan update readme md
+- v1.5.1, update readme.md - 12 Mei 2026
 
 ## Kontribusi
 Jika Anda ingin berkontribusi pada proyek ini, silakan fork repositori ini dan buat pull request dengan perubahan yang Anda usulkan. Semua kontribusi sangat dihargai!
