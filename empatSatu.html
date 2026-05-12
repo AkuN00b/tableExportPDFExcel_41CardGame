@@ -1,94 +1,196 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Empat Satu</title>
-
-    <!-- Link to the icon -->
     <link rel="icon" href="https://raw.githubusercontent.com/AkuN00b/tableExportPDFExcel_41CardGame/refs/heads/main/icon.png" type="image/png">
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
     <style>
-        .form-control {
-            width: 100%; /* Lebar input 100% */
-            min-width: 60px; /* Lebar minimum input */
+        body {
+            background: radial-gradient(1200px circle at 20% 20%, rgba(13, 110, 253, 0.12), transparent 55%),
+                radial-gradient(900px circle at 90% 10%, rgba(220, 53, 69, 0.12), transparent 45%),
+                radial-gradient(1000px circle at 50% 100%, rgba(25, 135, 84, 0.10), transparent 55%);
         }
-        td {
-            min-width: 60px; /* Lebar minimum td */
+
+        .app-card {
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
         }
+
+        [data-bs-theme="dark"] .app-card {
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .score-input {
+            min-width: 72px;
+            max-width: 96px;
+        }
+
         .input-error {
-            border: 2px solid red; /* Outline merah */
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 .25rem rgba(220, 53, 69, .15) !important;
+        }
+
+        .sticky-actions {
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+            background: rgba(var(--bs-body-bg-rgb), 0.92);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        [data-bs-theme="dark"] .sticky-actions {
+            border-top-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .table thead th {
+            white-space: nowrap;
+        }
+
+        .table td,
+        .table th {
+            vertical-align: middle;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Rekap Hasil Permainan Empat Satu</h1>
-
-        <div id="step1" class="mb-3">
-            <label for="numPlayers" class="form-label">Jumlah Pemain:</label>
-            <div class="input-group">
-                <button id="decrementPlayers" class="btn btn-outline-secondary" type="button"><i class="fas fa-minus"></i></button>
-                <input type="number" id="numPlayers" class="form-control text-center" value="2" readonly>
-                <button id="incrementPlayers" class="btn btn-outline-secondary" type="button"><i class="fas fa-plus"></i></button>
+    <nav class="navbar navbar-expand bg-body border-bottom sticky-top">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1 fw-semibold">Empat Satu</span>
+            <div class="d-flex gap-2 ms-auto">
+                <button id="themeToggle" class="btn btn-outline-secondary btn-sm" type="button" title="Ganti tema">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="newSession" class="btn btn-outline-danger btn-sm" type="button">
+                    <i class="fas fa-rotate-left"></i> Sesi Baru
+                </button>
             </div>
-            <button id="nextStep1" class="btn btn-primary mt-2"><i class="fas fa-arrow-right"></i> Selanjutnya</button>
         </div>
+    </nav>
 
-        <div id="step2" class="mb-3" style="display: none;">
-            <label for="playerNames" class="form-label">Nama Pemain:</label>
-            <div id="playerNames"></div>
-            <button id="nextStep2" class="btn btn-primary mt-2"><i class="fas fa-arrow-right"></i> Selanjutnya</button>
+    <main class="container py-4 py-md-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10 col-xl-9">
+                <div class="card app-card overflow-hidden">
+                    <div class="card-body p-3 p-md-4">
+                        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
+                            <div>
+                                <div class="h4 mb-1">Rekap Skor Permainan 41</div>
+                                <div class="text-body-secondary small">Auto-save aktif di browser</div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <span id="stepBadge1" class="badge text-bg-primary">1. Pemain</span>
+                                <span id="stepBadge2" class="badge text-bg-secondary">2. Nama</span>
+                                <span id="stepBadge3" class="badge text-bg-secondary">3. Skor</span>
+                            </div>
+                        </div>
+
+                        <div id="step1">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-12 col-md-7">
+                                    <label for="numPlayers" class="form-label fw-semibold">Jumlah pemain</label>
+                                    <div class="input-group">
+                                        <button id="decrementPlayers" class="btn btn-outline-secondary" type="button" aria-label="Kurangi pemain">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" id="numPlayers" class="form-control text-center" value="2" readonly>
+                                        <button id="incrementPlayers" class="btn btn-outline-secondary" type="button" aria-label="Tambah pemain">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text">Bisa 2 sampai 4 pemain.</div>
+                                </div>
+                                <div class="col-12 col-md-5 d-grid">
+                                    <button id="nextStep1" class="btn btn-primary">
+                                        Lanjut <i class="fas fa-arrow-right ms-1"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="step2" style="display: none;">
+                            <div class="mb-3">
+                                <div class="fw-semibold mb-2">Nama pemain</div>
+                                <div id="playerNames" class="row g-3"></div>
+                            </div>
+                            <div class="d-grid d-md-flex justify-content-md-end gap-2">
+                                <button id="backToStep1" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i> Kembali
+                                </button>
+                                <button id="nextStep2" class="btn btn-primary">
+                                    Lanjut <i class="fas fa-arrow-right ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="step3" style="display: none;">
+                            <div class="d-flex flex-column flex-md-row gap-2 align-items-md-center justify-content-between mb-3">
+                                <div id="scoreSummary" class="d-flex flex-wrap gap-2"></div>
+                                <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+                                    <button id="addRow" class="btn btn-outline-primary">
+                                        <i class="fas fa-plus"></i> Tambah
+                                    </button>
+                                    <button id="editAllPlayers" class="btn btn-outline-warning">
+                                        <i class="fas fa-edit"></i> Ubah Nama
+                                    </button>
+                                    <button id="finishGame" class="btn btn-success">
+                                        <i class="fas fa-check"></i> Selesai
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle" id="resultsTable">
+                                    <thead>
+                                        <tr id="tableHeader"></tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                    <tfoot>
+                                        <tr id="totalRow"></tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <div class="sticky-actions mt-3 p-3 rounded-3" style="display:none;" id="exportBar">
+                                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+                                    <div class="fw-semibold">Permainan selesai. Siap export.</div>
+                                    <div class="d-flex gap-2">
+                                        <button id="exportExcel" class="btn btn-success">
+                                            <i class="fas fa-file-excel"></i> Excel
+                                        </button>
+                                        <button id="exportPdf" class="btn btn-danger">
+                                            <i class="fas fa-file-pdf"></i> PDF
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center text-body-secondary small mt-3">
+                    Tip: data auto-save, jadi aman kalau kepencet refresh.
+                </div>
+            </div>
         </div>
+    </main>
 
-        <div id="step3" class="table-responsive" style="display: none;">
-            <table class="table table-bordered text-nowrap" id="resultsTable">
-                <thead>
-                    <tr id="tableHeader">
-                        <th width="1px">Permainan Ke-</th>
-                        <!-- Kolom tambahan akan ditambahkan secara dinamis -->
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-                <tfoot>
-                    <tr id="totalRow">
-                        <th>Jumlah</th>
-                        <!-- Kolom tambahan untuk total akan ditambahkan secara dinamis -->
-                        <td></td>
-                        <td></td>
-                    </tr>
-                </tfoot>
-            </table>
-            
-            <button id="addRow" class="btn btn-secondary"><i class="fas fa-plus"></i> Tambah Permainan</button>
-            <button id="editAllPlayers" class="btn btn-warning"><i class="fas fa-edit"></i> Ubah Nama Semua Pemain</button>
-            <button id="finishGame" class="btn btn-success"><i class="fas fa-check"></i> Selesai Permainan</button>
-            <button id="exportExcel" class="btn btn-success" style="display: none;"><i class="fas fa-file-excel"></i> Export ke Excel</button>
-            <button id="exportPdf" class="btn btn-danger" style="display: none;"><i class="fas fa-file-pdf"></i> Export ke PDF</button>
-        </div>
-    </div>
-
-    <!-- Modal untuk Mengubah Nama Semua Pemain -->
-    <div class="modal fade" id="editAllPlayersModal" tabindex="-1" role="dialog" aria-labelledby="editAllPlayersModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" id="editAllPlayersModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editAllPlayersModalLabel">Ubah Nama Semua Pemain</h5>
-                    <button type="button" class="close" aria-label="Close" style="border: none; background: transparent; color: #dc3545; font-size: 1.2rem;" onclick="closeModal()">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    <h5 class="modal-title">Ubah Nama Semua Pemain</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
-                <div class="modal-body" id="playerInputsContainer">
-                    <!-- Input untuk nama pemain akan ditambahkan di sini -->
+                <div class="modal-body">
+                    <div id="playerInputsContainer" class="vstack gap-2"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
-                    <button type="button" class="btn btn-primary" id="saveAllChanges">Simpan Perubahan</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="saveAllChanges">Simpan</button>
                 </div>
             </div>
         </div>
@@ -98,426 +200,641 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-
-    <!-- Tambahkan jQuery dan Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script>
-        document.getElementById('incrementPlayers').addEventListener('click', function() {
-            const numPlayers = document.getElementById('numPlayers');
-            if (parseInt(numPlayers.value) < 4) {
-                numPlayers.value = parseInt(numPlayers.value) + 1;
-            }
-        });
+        const STORAGE_KEY = 'empatSatu_state_v1';
+        const THEME_KEY = 'empatSatu_theme_v1';
+        const SCORE_MIN = 0;
+        const SCORE_MAX = 41;
 
-        document.getElementById('decrementPlayers').addEventListener('click', function() {
-            const numPlayers = document.getElementById('numPlayers');
-            if (parseInt(numPlayers.value) > 2) {
-                numPlayers.value = parseInt(numPlayers.value) - 1;
-            }
-        });
+        const el = {
+            step1: document.getElementById('step1'),
+            step2: document.getElementById('step2'),
+            step3: document.getElementById('step3'),
+            stepBadge1: document.getElementById('stepBadge1'),
+            stepBadge2: document.getElementById('stepBadge2'),
+            stepBadge3: document.getElementById('stepBadge3'),
+            numPlayers: document.getElementById('numPlayers'),
+            playerNames: document.getElementById('playerNames'),
+            tableHeader: document.getElementById('tableHeader'),
+            tableBody: document.querySelector('#resultsTable tbody'),
+            totalRow: document.getElementById('totalRow'),
+            scoreSummary: document.getElementById('scoreSummary'),
+            exportBar: document.getElementById('exportBar'),
+            themeToggle: document.getElementById('themeToggle'),
+            newSession: document.getElementById('newSession'),
+            backToStep1: document.getElementById('backToStep1')
+        };
 
-        document.getElementById('nextStep1').addEventListener('click', function() {
-            const numPlayers = document.getElementById('numPlayers').value;
-            
-            const playerNamesDiv = document.getElementById('playerNames');
-            playerNamesDiv.innerHTML = '';
+        const editPlayersModal = new bootstrap.Modal(document.getElementById('editAllPlayersModal'));
 
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            localStorage.setItem(THEME_KEY, theme);
+            const icon = theme === 'dark' ? 'fa-sun' : 'fa-moon';
+            el.themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem(THEME_KEY);
+            setTheme(savedTheme || 'light');
+        }
+
+        function setStep(step) {
+            el.step1.style.display = step === 1 ? 'block' : 'none';
+            el.step2.style.display = step === 2 ? 'block' : 'none';
+            el.step3.style.display = step === 3 ? 'block' : 'none';
+
+            el.stepBadge1.className = `badge ${step === 1 ? 'text-bg-primary' : 'text-bg-secondary'}`;
+            el.stepBadge2.className = `badge ${step === 2 ? 'text-bg-primary' : 'text-bg-secondary'}`;
+            el.stepBadge3.className = `badge ${step === 3 ? 'text-bg-primary' : 'text-bg-secondary'}`;
+        }
+
+        function clampPlayers(n) {
+            return Math.max(2, Math.min(4, n));
+        }
+
+        function clampScore(n) {
+            if (n === null || n === undefined || n === '') return '';
+            const v = Number(n);
+            if (Number.isNaN(v)) return '';
+            return Math.max(SCORE_MIN, Math.min(SCORE_MAX, v));
+        }
+
+        function debounce(fn, wait) {
+            let t;
+            return (...args) => {
+                clearTimeout(t);
+                t = setTimeout(() => fn(...args), wait);
+            };
+        }
+
+        const saveStateDebounced = debounce(saveState, 250);
+
+        function getPlayerNamesFromStep2(numPlayers) {
+            const names = [];
             for (let i = 1; i <= numPlayers; i++) {
-                const div = document.createElement('div');
-                div.className = 'mb-2';
+                const input = document.getElementById(`player${i}`);
+                names.push((input?.value || '').trim());
+            }
+            return names;
+        }
+
+        function getPlayerNamesFromTable(numPlayers) {
+            const names = [];
+            for (let i = 1; i <= numPlayers; i++) {
+                names.push((document.getElementById(`playerTableName${i}`)?.textContent || '').trim());
+            }
+            return names;
+        }
+
+        function buildPlayerInputs(numPlayers, presetNames = []) {
+            el.playerNames.innerHTML = '';
+            for (let i = 1; i <= numPlayers; i++) {
+                const col = document.createElement('div');
+                col.className = 'col-12 col-md-6';
+
                 const label = document.createElement('label');
-                label.textContent = 'Nama Pemain ' + i + ':';
+                label.className = 'form-label';
+                label.setAttribute('for', `player${i}`);
+                label.textContent = `Pemain ${i}`;
+
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.className = 'form-control';
-                input.id = 'player' + i;
-                div.appendChild(label);
-                div.appendChild(input);
-                playerNamesDiv.appendChild(div);
+                input.id = `player${i}`;
+                input.value = presetNames[i - 1] || '';
+                input.addEventListener('input', saveStateDebounced);
+
+                col.appendChild(label);
+                col.appendChild(input);
+                el.playerNames.appendChild(col);
             }
+        }
 
-            document.getElementById('step1').style.display = 'none';
-            document.getElementById('step2').style.display = 'block';
-        });
+        function buildTable(numPlayers, playerNames) {
+            el.tableHeader.innerHTML = '';
+            el.totalRow.innerHTML = '';
+            el.tableBody.innerHTML = '';
+            el.scoreSummary.innerHTML = '';
+            el.exportBar.style.display = 'none';
 
-        document.getElementById('nextStep2').addEventListener('click', function() {
-            const numPlayers = document.getElementById('numPlayers').value;
-            const tableHeader = document.getElementById('tableHeader');
-            tableHeader.innerHTML = '<th width="1px">Permainan Ke-</th>';
-            let allFilled = true;
-            let errorMessage = "";
+            const thIndex = document.createElement('th');
+            thIndex.textContent = 'Ke-';
+            thIndex.style.width = '1px';
+            el.tableHeader.appendChild(thIndex);
 
             for (let i = 1; i <= numPlayers; i++) {
-                const playerName = document.getElementById('player' + i).value;
-                if (!playerName.trim()) {
-                    allFilled = false;
-                    errorMessage += `Nama pemain ${i} tidak boleh kosong. `;
-                } else {
-                    const th = document.createElement('th');
-                    th.textContent = playerName;
-                    th.setAttribute('id', 'playerTableName' + i); // Menetapkan ID untuk th
-                    tableHeader.appendChild(th);
-                }
+                const th = document.createElement('th');
+                th.textContent = playerNames[i - 1] || `Pemain ${i}`;
+                th.id = `playerTableName${i}`;
+                el.tableHeader.appendChild(th);
             }
 
-            // Menambahkan header untuk kolom aksi
             const thAction = document.createElement('th');
             thAction.textContent = 'Aksi';
-            thAction.style.width = '1px'; // Mengatur lebar kolom menjadi 1px
-            tableHeader.appendChild(thAction);
+            thAction.style.width = '1px';
+            el.tableHeader.appendChild(thAction);
 
-            // Menambahkan kolom untuk total di baris total
-            const totalRow = document.getElementById('totalRow');
-            totalRow.innerHTML = '<th>Jumlah</th>';
+            const thTotal = document.createElement('th');
+            thTotal.textContent = 'Jumlah';
+            thTotal.style.width = '1px';
+            el.totalRow.appendChild(thTotal);
+
             for (let i = 0; i < numPlayers; i++) {
                 const td = document.createElement('td');
-                totalRow.appendChild(td);
+                td.className = 'fw-semibold text-center';
+                el.totalRow.appendChild(td);
             }
             const tdAction = document.createElement('td');
-            totalRow.appendChild(tdAction);
+            el.totalRow.appendChild(tdAction);
+        }
 
-            if (!allFilled) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: errorMessage
-                });
-                return;
+        function updateRowNumbers() {
+            const rows = el.tableBody.querySelectorAll('tr');
+            rows.forEach((row, index) => {
+                const tdIndex = row.querySelector('td');
+                if (tdIndex) tdIndex.textContent = index + 1;
+            });
+        }
+
+        function getTotals(numPlayers) {
+            const totals = Array(numPlayers).fill(0);
+            const rows = el.tableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                for (let j = 1; j <= numPlayers; j++) {
+                    const input = row.querySelector(`input[data-player="${j}"]`);
+                    const value = parseInt(input?.value, 10);
+                    if (!Number.isNaN(value)) totals[j - 1] += value;
+                }
+            });
+            return totals;
+        }
+
+        function renderSummary(numPlayers) {
+            const totals = getTotals(numPlayers);
+            const names = getPlayerNamesFromTable(numPlayers);
+            const max = totals.length ? Math.max(...totals) : 0;
+            el.scoreSummary.innerHTML = '';
+
+            for (let i = 0; i < numPlayers; i++) {
+                const total = totals[i];
+                const isLeader = total === max && el.tableBody.querySelectorAll('tr').length > 0;
+
+                const badge = document.createElement('div');
+                badge.className = `badge rounded-pill ${isLeader ? 'text-bg-success' : 'text-bg-secondary'} px-3 py-2`;
+                badge.innerHTML = `<span class="me-2">${names[i] || `Pemain ${i + 1}`}</span><span class="fw-semibold">${total}</span>`;
+                el.scoreSummary.appendChild(badge);
             }
 
-            document.getElementById('step2').style.display = 'none';
-            document.getElementById('step3').style.display = 'block';
-        });
+            for (let i = 1; i <= numPlayers; i++) {
+                el.totalRow.cells[i].textContent = totals[i - 1];
+            }
+        }
 
-        document.getElementById('addRow').addEventListener('click', function() {
-            const numPlayers = document.getElementById('numPlayers').value;
-            const tbody = document.querySelector('#resultsTable tbody');
+        function createScoreInput(playerIndex, initialValue) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.inputMode = 'numeric';
+            input.autocomplete = 'off';
+            input.className = 'form-control text-center score-input';
+            input.dataset.player = String(playerIndex);
+            input.value = initialValue === undefined || initialValue === null ? '' : String(initialValue);
+
+            input.addEventListener('input', () => {
+                const cleaned = input.value.replace(/[^0-9]/g, '').slice(0, 2);
+                input.value = cleaned;
+
+                const v = cleaned === '' ? '' : clampScore(parseInt(cleaned, 10));
+                if (v === '') {
+                    input.value = '';
+                    input.classList.remove('input-error');
+                } else if (String(v) !== cleaned) {
+                    input.value = String(v);
+                }
+
+                const finalValue = input.value === '' ? NaN : parseInt(input.value, 10);
+                if (!Number.isNaN(finalValue) && (finalValue < SCORE_MIN || finalValue > SCORE_MAX)) input.classList.add('input-error');
+                else input.classList.remove('input-error');
+                renderSummary(getNumPlayers());
+                saveStateDebounced();
+            });
+
+            return input;
+        }
+
+        function addRow(scores) {
+            const numPlayers = getNumPlayers();
             const newRow = document.createElement('tr');
 
             const tdIndex = document.createElement('td');
-            tdIndex.textContent = tbody.rows.length + 1;
+            tdIndex.className = 'text-center fw-semibold';
+            tdIndex.textContent = el.tableBody.rows.length + 1;
             newRow.appendChild(tdIndex);
 
-            for (var i = 1; i <= numPlayers; i++) {
-                var td = document.createElement('td');
-
-                var input = document.createElement('input');
-                input.type = 'number'; // Mengatur tipe input menjadi number
-                input.className = 'form-control';
-                input.maxLength = 2; // Ini tidak berfungsi untuk input type="number", tetapi bisa ditinggalkan
-                input.min = 0; // Nilai minimum
-                input.max = 41; // Nilai maksimum
-
-                input.oninput = function() {  
-                    // Menghapus karakter yang tidak valid  
-                    this.value = this.value.replace(/[^0-9]/g, ''); // Hanya izinkan angka  
-                  
-                    // Validasi untuk memastikan nilai berada dalam rentang yang ditentukan  
-                    if (this.value !== "" && (parseInt(this.value) > 41 || parseInt(this.value) < 0)) {  
-                        this.value = ''; // Kosongkan input jika nilai tidak valid  
-                        this.classList.add('input-error'); // Tambahkan kelas untuk outline merah
-                        updateTotal();  
-                        Swal.fire({  
-                            icon: 'error',  
-                            title: 'Error',  
-                            text: 'Nilai harus antara 0 dan 41.'  
-                        });  
-                    } else {  
-                        this.classList.remove('input-error'); // Hapus kelas jika nilai valid
-                        updateTotal();  
-                    }  
-                };  
-
-                // Tambahkan input ke td dan td ke newRow
-                td.appendChild(input);
+            for (let i = 1; i <= numPlayers; i++) {
+                const td = document.createElement('td');
+                td.className = 'text-center';
+                td.appendChild(createScoreInput(i, scores?.[i - 1]));
                 newRow.appendChild(td);
             }
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'btn btn-danger btn-sm';
-            deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-            deleteBtn.onclick = function() {
-                newRow.remove();
-                updateTotal();
-                updateRowNumbers(); // Memperbarui nomor permainan setelah penghapusan
-            };
-
             const tdDelete = document.createElement('td');
+            tdDelete.className = 'text-center';
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-outline-danger btn-sm';
+            deleteBtn.type = 'button';
+            deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+            deleteBtn.addEventListener('click', () => {
+                newRow.remove();
+                updateRowNumbers();
+                renderSummary(getNumPlayers());
+                saveStateDebounced();
+            });
             tdDelete.appendChild(deleteBtn);
             newRow.appendChild(tdDelete);
 
-            tbody.appendChild(newRow);
-            updateTotal();
-        });
-
-        // Event listener untuk tombol "Ubah Nama Semua Pemain"
-        document.getElementById('editAllPlayers').addEventListener('click', function() {
-            const numPlayers = document.getElementById('numPlayers').value;
-            const playerInputsContainer = document.getElementById('playerInputsContainer');
-            playerInputsContainer.innerHTML = ''; // Kosongkan kontainer input
-
-            for (let i = 1; i <= numPlayers; i++) {
-                const playerName = $(`#playerTableName${i}`).text();
-                playerInputsContainer.innerHTML += `
-                    <div class="form-group mb-2">
-                        <label for="playerName${i}">Nama Pemain ${i}: </label>
-                        <input type="text" class="form-control" id="playerName${i}" value="${playerName}" required>
-                    </div>
-                `;
-            }
-
-            // Tampilkan modal
-            $('#editAllPlayersModal').modal('show');
-        });
-
-        // Event listener untuk tombol "Simpan Perubahan"
-        $('#saveAllChanges').on('click', function() {
-            const numPlayers = document.getElementById('numPlayers').value;
-            let changesMade = false; // Variabel untuk melacak apakah ada perubahan
-
-            for (let i = 1; i <= numPlayers; i++) {
-                const newPlayerName = $(`#playerName${i}`).val();
-                const currentPlayerName = $(`#playerTableName${i}`).text(); // Ambil nama pemain saat ini
-
-                // Bandingkan nama baru dengan nama saat ini
-                if (newPlayerName !== currentPlayerName) {
-                    $(`#playerTableName${i}`).text(newPlayerName); // Update nama pemain di tabel
-                    changesMade = true; // Tandai bahwa ada perubahan
-                }
-            }
-
-            // Jika tidak ada perubahan, tampilkan pesan
-            if (!changesMade) {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Tidak Ada Perubahan',
-                    text: 'Tidak ada nama pemain yang diubah.'
-                });
-            } else {
-                // Tutup modal jika ada perubahan
-                $('#editAllPlayersModal').modal('hide');
-            }
-        });
-
-        function updateTotal() {
-            const numPlayers = document.getElementById('numPlayers').value;
-            const tbody = document.querySelector('#resultsTable tbody');
-            const totalRow = document.getElementById('totalRow');
-            let totals = Array(parseInt(numPlayers)).fill(0);
-
-            for (let i = 0; i < tbody.rows.length; i++) {
-                const row = tbody.rows[i];
-                for (let j = 1; j <= numPlayers; j++) {
-                    const value = parseInt(row.cells[j].firstChild.value);
-                    if (!isNaN(value)) {
-                        totals[j - 1] += value;
-                    }
-                }
-            }
-
-            for (let i = 1; i <= numPlayers; i++) {
-                totalRow.cells[i].textContent = totals[i - 1];
-            }
+            el.tableBody.appendChild(newRow);
+            renderSummary(numPlayers);
+            saveStateDebounced();
         }
 
-        // Fungsi untuk memperbarui nomor permainan
-        function updateRowNumbers() {
-            const tbody = document.querySelector('#resultsTable tbody');
-            const rows = tbody.querySelectorAll('tr');
-            rows.forEach((row, index) => {
-                const tdIndex = row.querySelector('td'); // Ambil kolom pertama (nomor permainan)
-                if (tdIndex) {
-                    tdIndex.textContent = index + 1; // Update nomor permainan
+        function validateNames(numPlayers) {
+            const names = getPlayerNamesFromStep2(numPlayers);
+            const errors = [];
+            for (let i = 0; i < names.length; i++) {
+                if (!names[i]) errors.push(`Nama pemain ${i + 1} tidak boleh kosong.`);
+            }
+            return { ok: errors.length === 0, names, errors };
+        }
+
+        function validateScores(numPlayers) {
+            if (el.tableBody.rows.length === 0) {
+                return { ok: false, message: 'Belum ada permainan yang ditambahkan.' };
+            }
+
+            let ok = true;
+            el.tableBody.querySelectorAll('input.score-input').forEach(input => {
+                if (!input.value.trim()) {
+                    ok = false;
+                    input.classList.add('input-error');
+                } else {
+                    input.classList.remove('input-error');
                 }
             });
+
+            if (!ok) return { ok: false, message: 'Masih ada input skor yang kosong.' };
+            return { ok: true };
         }
 
-        function closeModal() {
-            $('#editAllPlayersModal').modal('hide'); // Menutup modal
+        function setFinished(finished) {
+            const numPlayers = getNumPlayers();
+            document.getElementById('addRow').disabled = finished;
+            document.getElementById('finishGame').disabled = finished;
+            document.getElementById('editAllPlayers').disabled = finished;
+            el.tableBody.querySelectorAll('button').forEach(btn => btn.disabled = finished);
+            el.tableBody.querySelectorAll('input').forEach(input => input.disabled = finished);
+            el.exportBar.style.display = finished ? 'block' : 'none';
+            renderSummary(numPlayers);
         }
 
-        document.getElementById('finishGame').addEventListener('click', function() {
-            const tbody = document.querySelector('#resultsTable tbody');
-            if (tbody.rows.length === 0) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Tidak ada permainan yang ditambahkan.'
-                });
-                return;
-            }
+        function getNumPlayers() {
+            return clampPlayers(parseInt(el.numPlayers.value || '2', 10));
+        }
 
-            let allRowsFilled = true;
-            let errorMessage = []; // Menggunakan array untuk menyimpan pesan kesalahan
+        function getState() {
+            const numPlayers = getNumPlayers();
+            let step = 1;
+            if (el.step2.style.display !== 'none') step = 2;
+            if (el.step3.style.display !== 'none') step = 3;
 
-            for (let i = 0; i < tbody.rows.length; i++) {
-                const row = tbody.rows[i];
-                let rowErrors = []; // Array untuk menyimpan kesalahan di baris ini
+            let playerNames = [];
+            if (step === 1) playerNames = [];
+            if (step === 2) playerNames = getPlayerNamesFromStep2(numPlayers);
+            if (step === 3) playerNames = getPlayerNamesFromTable(numPlayers);
 
-                for (let j = 1; j < row.cells.length - 1; j++) {
-                    const input = row.cells[j].firstChild; // Ambil input
-                    if (!input.value.trim()) {
-                        allRowsFilled = false;
-                        rowErrors.push(`Kolom ${j} tidak boleh kosong.`); // Menyimpan kesalahan di baris ini
-                        input.classList.add('input-error'); // Tambahkan kelas untuk outline merah
-                    } else {
-                        input.classList.remove('input-error'); // Hapus kelas jika input terisi
+            const rounds = [];
+            if (step === 3) {
+                el.tableBody.querySelectorAll('tr').forEach(row => {
+                    const scores = [];
+                    for (let i = 1; i <= numPlayers; i++) {
+                        const input = row.querySelector(`input[data-player="${i}"]`);
+                        scores.push(input?.value === '' ? '' : parseInt(input.value, 10));
                     }
-                }
-
-                if (rowErrors.length > 0) {
-                    errorMessage.push(`Baris ${i + 1}: ${rowErrors.join(', ')}`); // Menyimpan kesalahan di baris ini
-                }
+                    rounds.push(scores);
+                });
             }
 
-            if (!allRowsFilled) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Perhatikan input yang belum diisi.', // Pesan kesalahan yang disederhanakan
-                    html: 'Input kosong, harus diisi dan telah ditandai dengan kotak merah.' // Menjelaskan tanda pada input
-                });
+            const finished = el.exportBar.style.display !== 'none';
+
+            return { step, numPlayers, playerNames, rounds, finished };
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(getState()));
+            } catch (e) {}
+        }
+
+        function clearState() {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (e) {}
+        }
+
+        function applyState(state) {
+            const numPlayers = clampPlayers(state?.numPlayers || 2);
+            el.numPlayers.value = String(numPlayers);
+
+            buildPlayerInputs(numPlayers, state?.playerNames || []);
+
+            if (state?.step === 1) {
+                setStep(1);
                 return;
             }
 
+            if (state?.step === 2) {
+                setStep(2);
+                return;
+            }
 
-            // Disable addRow, finishGame, and delete buttons
-            document.getElementById('addRow').disabled = true;
-            document.getElementById('finishGame').disabled = true;
-            tbody.querySelectorAll('button.btn-danger').forEach(btn => btn.disabled = true);
-            tbody.querySelectorAll('input').forEach(input => input.disabled = true);
+            const names = (state?.playerNames || []).slice(0, numPlayers).map(s => String(s || '').trim());
+            buildTable(numPlayers, names);
+            setStep(3);
+
+            (state?.rounds || []).forEach(r => addRow(r));
+            setFinished(!!state?.finished);
+        }
+
+        async function initStateFromStorage() {
+            let state = null;
+            try {
+                state = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+            } catch (e) {}
+
+            if (state && typeof state === 'object') {
+                const res = await Swal.fire({
+                    icon: 'question',
+                    title: 'Lanjutkan sesi terakhir?',
+                    text: 'Ada data tersimpan dari sesi sebelumnya.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Lanjutkan',
+                    cancelButtonText: 'Mulai baru'
+                });
+
+                if (res.isConfirmed) {
+                    applyState(state);
+                    return;
+                }
+                clearState();
+            }
+
+            applyState({ step: 1, numPlayers: 2, playerNames: [], rounds: [], finished: false });
+        }
+
+        document.getElementById('incrementPlayers').addEventListener('click', () => {
+            el.numPlayers.value = String(clampPlayers(getNumPlayers() + 1));
+            saveStateDebounced();
+        });
+
+        document.getElementById('decrementPlayers').addEventListener('click', () => {
+            el.numPlayers.value = String(clampPlayers(getNumPlayers() - 1));
+            saveStateDebounced();
+        });
+
+        document.getElementById('nextStep1').addEventListener('click', () => {
+            const numPlayers = getNumPlayers();
+            buildPlayerInputs(numPlayers);
+            setStep(2);
+            saveStateDebounced();
+        });
+
+        el.backToStep1.addEventListener('click', () => {
+            setStep(1);
+            saveStateDebounced();
+        });
+
+        document.getElementById('nextStep2').addEventListener('click', () => {
+            const numPlayers = getNumPlayers();
+            const { ok, names, errors } = validateNames(numPlayers);
+            if (!ok) {
+                Swal.fire({ icon: 'error', title: 'Error', text: errors.join(' ') });
+                return;
+            }
+            buildTable(numPlayers, names);
+            setStep(3);
+            renderSummary(numPlayers);
+            saveStateDebounced();
+        });
+
+        document.getElementById('addRow').addEventListener('click', () => addRow());
+
+        document.getElementById('editAllPlayers').addEventListener('click', () => {
+            const numPlayers = getNumPlayers();
+            const container = document.getElementById('playerInputsContainer');
+            container.innerHTML = '';
+            const names = getPlayerNamesFromTable(numPlayers);
+
+            for (let i = 1; i <= numPlayers; i++) {
+                const group = document.createElement('div');
+                group.className = 'vstack gap-1';
+
+                const label = document.createElement('label');
+                label.className = 'form-label mb-0';
+                label.setAttribute('for', `playerName${i}`);
+                label.textContent = `Pemain ${i}`;
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'form-control';
+                input.id = `playerName${i}`;
+                input.value = names[i - 1] || '';
+
+                group.appendChild(label);
+                group.appendChild(input);
+                container.appendChild(group);
+            }
+
+            editPlayersModal.show();
+        });
+
+        document.getElementById('saveAllChanges').addEventListener('click', () => {
+            const numPlayers = getNumPlayers();
+            let changesMade = false;
+            for (let i = 1; i <= numPlayers; i++) {
+                const newName = (document.getElementById(`playerName${i}`)?.value || '').trim();
+                const current = (document.getElementById(`playerTableName${i}`)?.textContent || '').trim();
+                if (newName !== current) {
+                    document.getElementById(`playerTableName${i}`).textContent = newName;
+                    changesMade = true;
+                }
+            }
+            if (!changesMade) {
+                Swal.fire({ icon: 'info', title: 'Tidak ada perubahan', text: 'Nama pemain tidak berubah.' });
+                return;
+            }
+            renderSummary(numPlayers);
+            saveStateDebounced();
+            editPlayersModal.hide();
+        });
+
+        document.getElementById('finishGame').addEventListener('click', async () => {
+            const numPlayers = getNumPlayers();
+            const validation = validateScores(numPlayers);
+            if (!validation.ok) {
+                Swal.fire({ icon: 'error', title: 'Error', text: validation.message });
+                return;
+            }
+
+            const res = await Swal.fire({
+                icon: 'question',
+                title: 'Selesaikan permainan?',
+                text: 'Setelah selesai, input akan dikunci sampai kamu mulai sesi baru.',
+                showCancelButton: true,
+                confirmButtonText: 'Selesai',
+                cancelButtonText: 'Batal'
+            });
+
+            if (!res.isConfirmed) return;
+
+            setFinished(true);
+            const totals = getTotals(numPlayers);
+            const names = getPlayerNamesFromTable(numPlayers);
+            const max = Math.max(...totals);
+            const winners = totals.map((t, i) => (t === max ? (names[i] || `Pemain ${i + 1}`) : null)).filter(Boolean);
 
             Swal.fire({
                 icon: 'success',
-                title: 'Permainan Selesai',
-                text: 'Anda dapat mengekspor hasilnya ke Excel atau PDF sekarang.'
+                title: 'Permainan selesai',
+                html: `Pemenang (skor tertinggi): <b>${winners.join(', ')}</b><br>Total: ${totals.join(' - ')}`
             });
-            document.getElementById('exportExcel').style.display = 'inline-block';
-            document.getElementById('exportPdf').style.display = 'inline-block';
+            saveState();
         });
 
-        document.getElementById('exportExcel').addEventListener('click', function() {
-            const table = document.getElementById('resultsTable');
-            const rows = table.querySelectorAll('tr');
-            let data = [];
+        document.getElementById('exportExcel').addEventListener('click', () => {
+            const numPlayers = getNumPlayers();
+            const names = getPlayerNamesFromTable(numPlayers);
+            const totals = getTotals(numPlayers);
+            const max = Math.max(...totals);
+            const winners = totals.map((t, i) => (t === max ? (names[i] || `Pemain ${i + 1}`) : null)).filter(Boolean);
 
-            // Add title
-            data.push(["Rekap Hasil Permainan Empat Satu"]);
-            data.push([`Tanggal Cetak: ${new Date().toLocaleString()}`]); // Add print date
-            data.push([]); // Empty row
+            const data = [];
+            data.push(['Rekap Hasil Permainan Empat Satu']);
+            data.push([`Tanggal Cetak: ${new Date().toLocaleString()}`]);
+            data.push([`Pemenang (skor tertinggi): ${winners.join(', ')}`]);
+            data.push([]);
 
-            // Extract header
-            let header = [];
-            rows[0].querySelectorAll('th').forEach((th, index) => {
-                if (index < rows[0].querySelectorAll('th').length - 1) { // Exclude the last column (Aksi)
-                    header.push(th.innerText);
+            data.push(['Ke-', ...names]);
+
+            el.tableBody.querySelectorAll('tr').forEach((tr, idx) => {
+                const row = [idx + 1];
+                for (let i = 1; i <= numPlayers; i++) {
+                    const input = tr.querySelector(`input[data-player="${i}"]`);
+                    row.push(input?.value ?? '');
                 }
-            });
-            data.push(header);
-
-            // Extract rows
-            for (let i = 1; i < rows.length - 1; i++) { // Loop through all rows except the last row (total row)
-                let row = [];
-                rows[i].querySelectorAll('td').forEach((td, index) => {
-                    if (index === 0) { // Include the first column (Nomor Permainan)
-                        row.push(td.innerText);
-                    } else if (index < rows[i].querySelectorAll('td').length - 1) { // Exclude the last column (Aksi)
-                        row.push(td.firstChild ? td.firstChild.value : td.innerText);
-                    }
-                });
                 data.push(row);
-            }
+            });
 
-            // Add total row
-            let totalRowData = ['Jumlah'];
-            for (let i = 1; i <= header.length - 1; i++) {
-                let total = 0;
-                rows.forEach(row => {
-                    if (row.querySelectorAll('td')[i] && row.querySelectorAll('td')[i].firstChild) {
-                        const value = parseInt(row.querySelectorAll('td')[i].firstChild.value);
-                        if (!isNaN(value)) {
-                            total += value;
-                        }
-                    }
-                });
-                totalRowData.push(total);
-            }
-            data.push(totalRowData);
+            data.push(['Jumlah', ...totals]);
 
-            // Convert data array to worksheet
             const worksheet = XLSX.utils.aoa_to_sheet(data);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet 1");
-
-            // Style the title
-            worksheet['A1'].s = { font: { bold: true } };
-
-            // Export the workbook to Excel file
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Rekap');
             XLSX.writeFile(workbook, 'rekap_permainan_41.xlsx');
         });
 
-        document.getElementById('exportPdf').addEventListener('click', function() {
+        document.getElementById('exportPdf').addEventListener('click', () => {
+            const numPlayers = getNumPlayers();
+            const names = getPlayerNamesFromTable(numPlayers);
+            const totals = getTotals(numPlayers);
+            const max = Math.max(...totals);
+            const winners = totals.map((t, i) => (t === max ? (names[i] || `Pemain ${i + 1}`) : null)).filter(Boolean);
+
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const doc = new jsPDF({ unit: 'pt', format: 'a4' });
 
-            const table = document.getElementById('resultsTable');
-            const rows = table.querySelectorAll('tr');
-            let data = [];
+            const title = 'Rekap Hasil Permainan Empat Satu';
+            const printedAt = `Tanggal Cetak: ${new Date().toLocaleString()}`;
+            const winnerLine = `Pemenang (skor tertinggi): ${winners.join(', ')}`;
 
-            // Extract header
-            let header = [];
-            rows[0].querySelectorAll('th').forEach((th, index) => {
-                if (index < rows[0].querySelectorAll('th').length - 1) { // Exclude the last column (Aksi)
-                    header.push(th.innerText);
+            doc.setFontSize(13);
+            doc.text(title, 40, 44);
+            doc.setFontSize(10);
+            doc.setTextColor(90);
+            doc.text(printedAt, 40, 62);
+            doc.text(winnerLine, 40, 78);
+            doc.setTextColor(0);
+
+            const head = [['Ke-', ...names]];
+            const body = [];
+            el.tableBody.querySelectorAll('tr').forEach((tr, idx) => {
+                const row = [String(idx + 1)];
+                for (let i = 1; i <= numPlayers; i++) {
+                    const input = tr.querySelector(`input[data-player="${i}"]`);
+                    row.push(input?.value ?? '');
+                }
+                body.push(row);
+            });
+            body.push(['Jumlah', ...totals.map(t => String(t))]);
+
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 40;
+            const available = pageWidth - margin * 2;
+            const firstCol = 44;
+            const rawOther = Math.floor((available - firstCol) / numPlayers);
+            const otherCol = Math.max(34, Math.min(56, rawOther));
+            const tableWidth = firstCol + otherCol * numPlayers;
+
+            const columnStyles = { 0: { cellWidth: firstCol, halign: 'center' } };
+            for (let i = 1; i <= numPlayers; i++) {
+                columnStyles[i] = { cellWidth: otherCol, halign: 'center' };
+            }
+
+            doc.autoTable({
+                head,
+                body,
+                startY: 92,
+                margin: { left: margin, right: margin },
+                theme: 'striped',
+                tableWidth,
+                styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak', valign: 'middle' },
+                headStyles: { fillColor: [33, 37, 41], textColor: 255 },
+                columnStyles,
+                didParseCell: function (data) {
+                    const isLast = data.row.index === body.length - 1;
+                    if (isLast) {
+                        data.cell.styles.fontStyle = 'bold';
+                        data.cell.styles.fillColor = [248, 249, 250];
+                    }
                 }
             });
-            data.push(header);
 
-            // Extract rows
-            for (let i = 1; i < rows.length - 1; i++) { // Loop through all rows except the last row (total row)
-                let row = [];
-                rows[i].querySelectorAll('td').forEach((td, index) => {
-                    if (index === 0) { // Include the first column (Nomor Permainan)
-                        row.push(td.innerText);
-                    } else if (index < rows[i].querySelectorAll('td').length - 1) { // Exclude the last column (Aksi)
-                        row.push(td.firstChild ? td.firstChild.value : td.innerText);
-                    }
-                });
-                data.push(row);
-            }
-
-            // Add total row
-            let totalRowData = ['Jumlah'];
-            for (let i = 1; i <= header.length - 1; i++) {
-                let total = 0;
-                rows.forEach(row => {
-                    if (row.querySelectorAll('td')[i] && row.querySelectorAll('td')[i].firstChild) {
-                        const value = parseInt(row.querySelectorAll('td')[i].firstChild.value);
-                        if (!isNaN(value)) {
-                            total += value;
-                        }
-                    }
-                });
-                totalRowData.push(total);
-            }
-            data.push(totalRowData);
-
-            // Add the title and print date to the PDF
-            doc.text('Rekap Hasil Permainan Empat Satu', 14, 10);
-            doc.text(`Tanggal Cetak: ${new Date().toLocaleString()}`, 14, 18);
-
-            // Add the data to the PDF
-            doc.autoTable({
-                head: [data[0]],
-                body: data.slice(1),
-                startY: 22
-            });
-
-            // Save the PDF
             doc.save('rekap_permainan_41.pdf');
         });
+
+        el.themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-bs-theme') || 'light';
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+
+        el.newSession.addEventListener('click', async () => {
+            const res = await Swal.fire({
+                icon: 'warning',
+                title: 'Mulai sesi baru?',
+                text: 'Data sesi saat ini akan dihapus dari auto-save.',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, mulai baru',
+                cancelButtonText: 'Batal'
+            });
+            if (!res.isConfirmed) return;
+            clearState();
+            applyState({ step: 1, numPlayers: 2, playerNames: [], rounds: [], finished: false });
+            saveState();
+        });
+
+        initTheme();
+        initStateFromStorage();
     </script>
 </body>
 </html>
