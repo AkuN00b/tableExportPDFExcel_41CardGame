@@ -16,6 +16,7 @@ Proyek ini adalah sebuah aplikasi berbasis web untuk merekap hasil permainan kar
 - Menampilkan ringkasan total skor dan pemenang (skor tertinggi).
 - Mengekspor hasil permainan ke format Excel.
 - Mengekspor hasil permainan ke format PDF.
+- PWA (Progressive Web App) — bisa diinstall ke home screen HP dan dipakai offline.
 
 ## Penggunaan
 1. Buka link [bit.ly/empatSatu](https://bit.ly/empatSatu) di browser.
@@ -33,6 +34,7 @@ Proyek ini adalah sebuah aplikasi berbasis web untuk merekap hasil permainan kar
 - [SweetAlert2](https://sweetalert2.github.io/)
 - [jsPDF](https://github.com/parallax/jsPDF)
 - [SheetJS (xlsx)](https://github.com/SheetJS/sheetjs)
+- Service Worker (PWA)
 
 ## Versioning
 - v1.0, pertama kali commit - 7 Agustus 2024
@@ -56,6 +58,7 @@ Proyek ini adalah sebuah aplikasi berbasis web untuk merekap hasil permainan kar
 - v1.4.4, update readme.md - 30 Januari 2025
 - v1.5.0, menggunakan agent ai untuk mengetes agent ai dan memperbarui fitur seperti autosave, export pdf dirapihkan dan update readme md
 - v1.5.1, update readme.md - 12 Mei 2026
+- v1.6.0, tambah fitur PWA (manifest.json, service worker, installable, offline) - 16 Mei 2026
 
 ## Kontribusi
 Jika Anda ingin berkontribusi pada proyek ini, silakan fork repositori ini dan buat pull request dengan perubahan yang Anda usulkan. Semua kontribusi sangat dihargai!

@@ -1,0 +1,26 @@
+{
+  "name": "Empat Satu - Pencatat Skor",
+  "short_name": "Empat Satu",
+  "description": "Aplikasi pencatat skor permainan kartu 41. Rekap skor, export Excel/PDF.",
+  "start_url": "empatSatu.html",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0d6efd",
+  "categories": ["games", "utilities"],
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
