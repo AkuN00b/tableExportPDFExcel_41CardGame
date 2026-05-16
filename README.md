@@ -8,12 +8,15 @@ Proyek ini adalah sebuah aplikasi berbasis web untuk merekap hasil permainan kar
 - Memasukkan nama pemain berdasarkan jumlah pemain.
 - Menambahkan permainan dan masukan skor untuk setiap permainan.
 - Validasi input skor (antara 0 dan 41).
-- Menghapus baris permainan.
+- Menghapus baris permainan (juga bisa swipe-to-delete di HP).
 - Mengubah nama pemain.
 - Menjumlahkan skor otomatis.
 - Validasi input skor kosong.
 - Auto-save sesi di browser + opsi lanjutkan sesi terakhir.
 - Menampilkan ringkasan total skor dan pemenang (skor tertinggi).
+- Grafik skor per ronde (line chart).
+- Floating tombol "+" tambah ronde (mobile-friendly).
+- Auto-focus input dan keyboard Enter/Tab navigasi antar pemain.
 - Mengekspor hasil permainan ke format Excel.
 - Mengekspor hasil permainan ke format PDF.
 - PWA (Progressive Web App) — bisa diinstall ke home screen HP dan dipakai offline.
@@ -34,6 +37,7 @@ Proyek ini adalah sebuah aplikasi berbasis web untuk merekap hasil permainan kar
 - [SweetAlert2](https://sweetalert2.github.io/)
 - [jsPDF](https://github.com/parallax/jsPDF)
 - [SheetJS (xlsx)](https://github.com/SheetJS/sheetjs)
+- [Chart.js](https://www.chartjs.org/)
 - Service Worker (PWA)
 
 ## Versioning
@@ -59,6 +63,7 @@ Proyek ini adalah sebuah aplikasi berbasis web untuk merekap hasil permainan kar
 - v1.5.0, menggunakan agent ai untuk mengetes agent ai dan memperbarui fitur seperti autosave, export pdf dirapihkan dan update readme md
 - v1.5.1, update readme.md - 12 Mei 2026
 - v1.6.0, tambah fitur PWA (manifest.json, service worker, installable, offline) - 16 Mei 2026
+- v1.7.0, tambah fitur grafik (Chart.js), swipe-to-delete mobile, auto-focus + keyboard navigasi, floating tombol tambah - 16 Mei 2026
 
 ## Kontribusi
 Jika Anda ingin berkontribusi pada proyek ini, silakan fork repositori ini dan buat pull request dengan perubahan yang Anda usulkan. Semua kontribusi sangat dihargai!
