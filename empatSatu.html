@@ -1027,18 +1027,13 @@
             const max = Math.max(...totals);
             const winners = totals.map((t, i) => (t === max ? (names[i] || `Pemain ${i + 1}`) : null)).filter(Boolean);
 
-            let text = 'Rekap Hasil Permainan Empat Satu\n';
-            text += `Pemenang: ${winners.join(', ')}\n\n`;
-            text += ['Ke-', ...names].join('\t') + '\n';
-            el.tableBody.querySelectorAll('tr').forEach((tr, idx) => {
-                const row = [idx + 1];
-                for (let i = 1; i <= numPlayers; i++) {
-                    const input = tr.querySelector(`input[data-player="${i}"]`);
-                    row.push(input?.value ?? '');
-                }
-                text += row.join('\t') + '\n';
-            });
-            text += ['Jumlah', ...totals].join('\t');
+            let text = 'Rekap Hasil Permainan Empat Satu';
+            text += `\nPemenang: ${winners.join(', ')}`;
+            text += `\n${new Date().toLocaleString()}`;
+
+            if (navigator.canShare && navigator.canShare({ files: [new File([], '')] })) {
+                text += '\n\n*PDF terlampir di bawah pesan ini';
+            }
             return text;
         }
 
