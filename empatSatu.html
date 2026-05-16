@@ -234,6 +234,9 @@
                                         <button id="exportPdf" class="btn btn-danger">
                                             <i class="fas fa-file-pdf"></i> PDF
                                         </button>
+                                        <button id="shareWa" class="btn btn-success" title="Bagikan ke WhatsApp">
+                                            <i class="fab fa-whatsapp"></i> WA
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -548,10 +551,35 @@
             deleteBtn.type = 'button';
             deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
             deleteBtn.addEventListener('click', () => {
-                newRow.remove();
-                updateRowNumbers();
-                renderSummary(getNumPlayers());
-                saveStateDebounced();
+                newRow.dataset.originalDisplay = newRow.style.display;
+                newRow.style.display = 'none';
+
+                Swal.fire({
+                    toast: true,
+                    position: 'bottom',
+                    icon: 'warning',
+                    title: 'Baris dihapus',
+                    showConfirmButton: false,
+                    showCancelButton: true,
+                    cancelButtonText: '<i class="fas fa-undo me-1"></i>Urungkan',
+                    cancelButtonColor: '#0d6efd',
+                    timer: 5000,
+                    timerProgressBar: true,
+                    didOpen: () => { renderSummary(getNumPlayers()); saveStateDebounced(); }
+                }).then(result => {
+                    if (result.dismiss === Swal.DismissReason.cancel) {
+                        newRow.style.display = newRow.dataset.originalDisplay || '';
+                        newRow.removeAttribute('data-original-display');
+                        updateRowNumbers();
+                        renderSummary(getNumPlayers());
+                        saveStateDebounced();
+                    } else {
+                        newRow.remove();
+                        updateRowNumbers();
+                        renderSummary(getNumPlayers());
+                        saveStateDebounced();
+                    }
+                });
             });
             tdDelete.appendChild(deleteBtn);
             newRow.appendChild(tdDelete);
@@ -923,6 +951,117 @@
             });
 
             doc.save('rekap_permainan_41.pdf');
+        });
+
+        function generatePdfBlob() {
+            const numPlayers = getNumPlayers();
+            const names = getPlayerNamesFromTable(numPlayers);
+            const totals = getTotals(numPlayers);
+            const max = Math.max(...totals);
+            const winners = totals.map((t, i) => (t === max ? (names[i] || `Pemain ${i + 1}`) : null)).filter(Boolean);
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+
+            const title = 'Rekap Hasil Permainan Empat Satu';
+            const printedAt = `Tanggal Cetak: ${new Date().toLocaleString()}`;
+            const winnerLine = `Pemenang (skor tertinggi): ${winners.join(', ')}`;
+
+            doc.setFontSize(13);
+            doc.text(title, 40, 44);
+            doc.setFontSize(10);
+            doc.setTextColor(90);
+            doc.text(printedAt, 40, 62);
+            doc.text(winnerLine, 40, 78);
+            doc.setTextColor(0);
+
+            const head = [['Ke-', ...names]];
+            const body = [];
+            el.tableBody.querySelectorAll('tr').forEach((tr, idx) => {
+                const row = [String(idx + 1)];
+                for (let i = 1; i <= numPlayers; i++) {
+                    const input = tr.querySelector(`input[data-player="${i}"]`);
+                    row.push(input?.value ?? '');
+                }
+                body.push(row);
+            });
+            body.push(['Jumlah', ...totals.map(t => String(t))]);
+
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 40;
+            const available = pageWidth - margin * 2;
+            const firstCol = 44;
+            const rawOther = Math.floor((available - firstCol) / numPlayers);
+            const otherCol = Math.max(34, Math.min(56, rawOther));
+            const tableWidth = firstCol + otherCol * numPlayers;
+
+            const columnStyles = { 0: { cellWidth: firstCol, halign: 'center' } };
+            for (let i = 1; i <= numPlayers; i++) {
+                columnStyles[i] = { cellWidth: otherCol, halign: 'center' };
+            }
+
+            doc.autoTable({
+                head, body,
+                startY: 92,
+                margin: { left: margin, right: margin },
+                theme: 'striped',
+                tableWidth,
+                styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak', valign: 'middle' },
+                headStyles: { fillColor: [33, 37, 41], textColor: 255 },
+                columnStyles,
+                didParseCell: function (data) {
+                    if (data.row.index === body.length - 1) {
+                        data.cell.styles.fontStyle = 'bold';
+                        data.cell.styles.fillColor = [248, 249, 250];
+                    }
+                }
+            });
+
+            return doc.output('blob');
+        }
+
+        function buildShareText() {
+            const numPlayers = getNumPlayers();
+            const names = getPlayerNamesFromTable(numPlayers);
+            const totals = getTotals(numPlayers);
+            const max = Math.max(...totals);
+            const winners = totals.map((t, i) => (t === max ? (names[i] || `Pemain ${i + 1}`) : null)).filter(Boolean);
+
+            let text = 'Rekap Hasil Permainan Empat Satu\n';
+            text += `Pemenang: ${winners.join(', ')}\n\n`;
+            text += ['Ke-', ...names].join('\t') + '\n';
+            el.tableBody.querySelectorAll('tr').forEach((tr, idx) => {
+                const row = [idx + 1];
+                for (let i = 1; i <= numPlayers; i++) {
+                    const input = tr.querySelector(`input[data-player="${i}"]`);
+                    row.push(input?.value ?? '');
+                }
+                text += row.join('\t') + '\n';
+            });
+            text += ['Jumlah', ...totals].join('\t');
+            return text;
+        }
+
+        document.getElementById('shareWa').addEventListener('click', async () => {
+            const blob = generatePdfBlob();
+            const file = new File([blob], 'rekap_permainan_41.pdf', { type: 'application/pdf' });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        title: 'Rekap Permainan Empat Satu',
+                        text: 'Hasil rekap skor permainan 41',
+                        files: [file]
+                    });
+                    return;
+                } catch (e) {
+                    if (e.name === 'AbortError') return;
+                }
+            }
+
+            const text = buildShareText();
+            const encoded = encodeURIComponent(text);
+            window.open(`https://wa.me/?text=${encoded}`, '_blank');
         });
 
         let scoreChart = null;

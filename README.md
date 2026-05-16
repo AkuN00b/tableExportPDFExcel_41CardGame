@@ -8,7 +8,7 @@ Proyek ini adalah sebuah aplikasi berbasis web untuk merekap hasil permainan kar
 - Memasukkan nama pemain berdasarkan jumlah pemain.
 - Menambahkan permainan dan masukan skor untuk setiap permainan.
 - Validasi input skor (antara 0 dan 41).
-- Menghapus baris permainan (juga bisa swipe-to-delete di HP).
+- Menghapus baris permainan dengan undo (toast Urungkan 5 detik) + swipe-to-delete di HP.
 - Mengubah nama pemain.
 - Menjumlahkan skor otomatis.
 - Validasi input skor kosong.
@@ -19,6 +19,7 @@ Proyek ini adalah sebuah aplikasi berbasis web untuk merekap hasil permainan kar
 - Auto-focus input dan keyboard Enter/Tab navigasi antar pemain.
 - Mengekspor hasil permainan ke format Excel.
 - Mengekspor hasil permainan ke format PDF.
+- Bagikan hasil permainan langsung ke WhatsApp dengan PDF (Web Share API) atau teks (fallback).
 - PWA (Progressive Web App) — bisa diinstall ke home screen HP dan dipakai offline.
 
 ## Penggunaan
@@ -64,6 +65,7 @@ Proyek ini adalah sebuah aplikasi berbasis web untuk merekap hasil permainan kar
 - v1.5.1, update readme.md - 12 Mei 2026
 - v1.6.0, tambah fitur PWA (manifest.json, service worker, installable, offline) - 16 Mei 2026
 - v1.7.0, tambah fitur grafik (Chart.js), swipe-to-delete mobile, auto-focus + keyboard navigasi, floating tombol tambah - 16 Mei 2026
+- v1.8.0, tambah fitur undo hapus baris, share langsung ke WhatsApp dengan PDF - 16 Mei 2026
 
 ## Kontribusi
 Jika Anda ingin berkontribusi pada proyek ini, silakan fork repositori ini dan buat pull request dengan perubahan yang Anda usulkan. Semua kontribusi sangat dihargai!
